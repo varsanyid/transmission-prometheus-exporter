@@ -154,9 +154,6 @@ func (c *MetricCache) UpdateMetrics(stats *rpc.SessionStats, torrents []*rpc.Tor
 	// Update operational metrics
 	c.updateOperationalMetrics(content)
 	
-	// Update cache age metric
-	c.metricUpdater.UpdateCacheMetrics(0, 0, 0) // Age is 0 for fresh data
-	
 	duration := time.Since(startTime)
 	c.logger.WithFields(logrus.Fields{
 		"update_count":     c.updateCount,
