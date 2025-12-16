@@ -1,0 +1,27 @@
+{
+  "transmission": {
+    "host": "localhost",
+    "port": 9091,
+    "path": "/transmission/rpc",
+    "username": "",
+    "password": "",
+    "use_https": false,
+    "timeout": "10s"
+  },
+  "exporter": {
+    "port": 9190,
+    "path": "/metrics",
+    "poll_interval": "15s",
+    "max_stale_age": "5m",
+    "instance": "default"
+  },
+  "logging": {
+    "level": "info",
+    "format": "json"
+  },
+  "common_labels": {
+    "transmission_host": "",
+    "exporter_instance": "",
+    "transmission_port": ""
+  }
+}

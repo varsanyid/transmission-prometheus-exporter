@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # Transmission BitTorrent client
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=${TRANSMISSION_PUID:-1000}
+      - PGID=${TRANSMISSION_PGID:-1000}
+      - TZ=${TRANSMISSION_TZ:-UTC}
+      - TRANSMISSION_WEB_HOME=/transmission-web-control/
+      - USER=${TRANSMISSION_USER:-admin}
+      - PASS=${TRANSMISSION_PASS:-password123}
+    volumes:
+      - transmission_config:/config
+      - transmission_downloads:/downloads
+      - transmission_watch:/watch
+    ports:
+      - "${TRANSMISSION_WEB_PORT:-9091}:9091"  # Web UI and RPC API
+      - "${TRANSMISSION_PEER_PORT:-51413}:51413"  # BitTorrent protocol
+      - "${TRANSMISSION_PEER_PORT:-51413}:51413/udp"
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  # Transmission Prometheus Exporter
+  transmission-exporter:
+    image: transmission-prometheus-exporter:latest
+    container_name: transmission-exporter
+    environment:
+      # Transmission connection settings (Requirements 7.1, 7.2, 7.4)
+      - TRANSMISSION_EXPORTER_TRANSMISSION_HOST=${TRANSMISSION_EXPORTER_TRANSMISSION_HOST:-transmission}
+      - TRANSMISSION_EXPORTER_TRANSMISSION_PORT=${TRANSMISSION_EXPORTER_TRANSMISSION_PORT:-9091}
+      - TRANSMISSION_EXPORTER_TRANSMISSION_USERNAME=${TRANSMISSION_EXPORTER_TRANSMISSION_USERNAME:-admin}
+      - TRANSMISSION_EXPORTER_TRANSMISSION_PASSWORD=${TRANSMISSION_EXPORTER_TRANSMISSION_PASSWORD:-password123}
+      - TRANSMISSION_EXPORTER_TRANSMISSION_USE_HTTPS=${TRANSMISSION_EXPORTER_TRANSMISSION_USE_HTTPS:-false}
+      - TRANSMISSION_EXPORTER_TRANSMISSION_TIMEOUT=${TRANSMISSION_EXPORTER_TRANSMISSION_TIMEOUT:-10s}
+      
+      # Exporter settings (Requirements 7.2, 7.3)
+      - TRANSMISSION_EXPORTER_EXPORTER_PORT=${TRANSMISSION_EXPORTER_EXPORTER_PORT:-9190}
+      - TRANSMISSION_EXPORTER_EXPORTER_PATH=${TRANSMISSION_EXPORTER_EXPORTER_PATH:-/metrics}
+      - TRANSMISSION_EXPORTER_EXPORTER_POLL_INTERVAL=${TRANSMISSION_EXPORTER_EXPORTER_POLL_INTERVAL:-15s}
+      - TRANSMISSION_EXPORTER_EXPORTER_MAX_STALE_AGE=${TRANSMISSION_EXPORTER_EXPORTER_MAX_STALE_AGE:-5m}
+      - TRANSMISSION_EXPORTER_EXPORTER_INSTANCE=${TRANSMISSION_EXPORTER_EXPORTER_INSTANCE:-docker-compose}
+      
+      # Logging configuration (Requirements 7.5)
+      - TRANSMISSION_EXPORTER_LOGGING_LEVEL=${TRANSMISSION_EXPORTER_LOGGING_LEVEL:-info}
+      - TRANSMISSION_EXPORTER_LOGGING_FORMAT=${TRANSMISSION_EXPORTER_LOGGING_FORMAT:-json}
+    ports:
+      - "${EXPORTER_PORT:-9190}:9190"  # Metrics endpoint
+    depends_on:
+      - transmission
+    restart: unless-stopped
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9190/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Prometheus server for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    depends_on:
+      - transmission-exporter
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+volumes:
+  transmission_config:
+  transmission_downloads:
+  transmission_watch:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge

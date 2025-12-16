@@ -1,0 +1,41 @@
+# Example prometheus scrape config
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Scrape configuration for Transmission Prometheus Exporter
+scrape_configs:
+  # Transmission Exporter metrics
+  - job_name: 'transmission-exporter'
+    static_configs:
+      - targets: ['transmission-exporter:9190']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    
+    # Optional: Add additional labels to identify this scrape target
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: transmission-exporter:9190
+
+  # Optional: Scrape Prometheus itself for monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+
+# Optional: Alerting rules (create alerting_rules.yml separately)
+# rule_files:
+#   - "alerting_rules.yml"
+
+# Optional: Alertmanager configuration
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093

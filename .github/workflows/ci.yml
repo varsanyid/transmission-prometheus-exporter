@@ -1,0 +1,134 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: varsanyidaniel/transmission-prometheus-exporter
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Run tests
+        run: go test -v ./...
+
+      # TODO: Re-enable integration tests once Transmission container startup issues are resolved
+      # - name: Start Transmission for integration tests
+      #   run: |
+      #     docker compose -f docker-compose.test.yml up -d
+      #     timeout 120 bash -c 'until curl -f http://localhost:9091/transmission/rpc 2>/dev/null; do sleep 5; done'
+      #
+      # - name: Run integration tests
+      #   run: |
+      #     TRANSMISSION_HOST=localhost \
+      #     TRANSMISSION_PORT=9091 \
+      #     TRANSMISSION_USERNAME=admin \
+      #     TRANSMISSION_PASSWORD=password \
+      #     go test -tags=integration -v ./internal/rpc
+      #
+      # - name: Stop Transmission
+      #   if: always()
+      #   run: docker compose -f docker-compose.test.yml down -v
+
+      - name: Build binary
+        run: go build -v -o transmission-exporter ./cmd/transmission-exporter
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ github.ref_name || github.sha }}
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_DATE=${{ github.run_started_at }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # TODO: Re-enable separate release job once development iteration is complete
+  # build-and-push:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'release'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #
+  #     - name: Log in to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #
+  #     - name: Extract metadata
+  #       id: meta
+  #       uses: docker/metadata-action@v5
+  #       with:
+  #         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+  #         tags: |
+  #           type=ref,event=tag
+  #           type=raw,value=latest
+  #
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         platforms: linux/amd64,linux/arm64,linux/arm/v7
+  #         push: true
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         labels: ${{ steps.meta.outputs.labels }}
+  #         build-args: |
+  #           VERSION=${{ github.ref_name }}
+  #           GIT_COMMIT=${{ github.sha }}
+  #           BUILD_DATE=${{ github.run_started_at }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max

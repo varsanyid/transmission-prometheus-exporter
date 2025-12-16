@@ -1,0 +1,20 @@
+services:
+  transmission:
+    image: transmission:latest
+    container_name: transmission-test
+    environment:
+      - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
+      - TRANSMISSION_RPC_USERNAME=admin
+      - TRANSMISSION_RPC_PASSWORD=password
+      - TRANSMISSION_RPC_WHITELIST_ENABLED=false
+    ports:
+      - "9091:9091"
+    volumes:
+      - transmission-config:/var/lib/transmission-daemon
+      - transmission-downloads:/downloads
+    restart: unless-stopped
+
+volumes:
+  transmission-config:
+  transmission-downloads:
+  transmission-watch:

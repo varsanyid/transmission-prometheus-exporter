@@ -1,0 +1,58 @@
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+TESTING.md
+*.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts and binaries
+transmission-exporter
+rpc.test
+*.test
+*.out
+
+# Test files and coverage
+coverage.out
+coverage.html
+*.cover
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker files (except Dockerfile itself)
+docker-compose*.yml
+Dockerfile.*
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Development and testing scripts
+*.sh
+
+# Kiro specs (not needed in container)
+.kiro/
+
+# Go module cache (will be downloaded in container)
+vendor/

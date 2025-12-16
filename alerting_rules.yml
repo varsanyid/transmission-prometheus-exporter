@@ -1,0 +1,77 @@
+# Example alerting rules
+groups:
+- name: transmission_exporter
+  rules:
+  - alert: TransmissionExporterDown
+    expr: up{job="transmission-exporter"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Transmission exporter is down"
+      description: "Transmission exporter {{ $labels.instance }} has been down for more than 1 minute."
+
+  - alert: TransmissionConnectionLost
+    expr: transmission_exporter_connection_state == 0
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Lost connection to Transmission"
+      description: "Exporter {{ $labels.instance }} cannot connect to Transmission at {{ $labels.transmission_host }}:{{ $labels.transmission_port }}"
+
+  - alert: TransmissionHighErrorRate
+    expr: rate(transmission_exporter_scrape_errors_total[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High error rate in Transmission exporter"
+      description: "Exporter {{ $labels.instance }} has error rate of {{ $value }} errors/second"
+
+  - alert: TransmissionStaleCache
+    expr: transmission_exporter_cache_age_seconds > 300
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Transmission exporter cache is stale"
+      description: "Exporter {{ $labels.instance }} cache is {{ $value }} seconds old"
+
+  - alert: TransmissionHighLatency
+    expr: histogram_quantile(0.95, rate(transmission_exporter_rpc_latency_seconds_bucket[5m])) > 5
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High RPC latency to Transmission"
+      description: "95th percentile RPC latency is {{ $value }} seconds for {{ $labels.instance }}"
+
+- name: transmission_torrents
+  rules:
+  - alert: TransmissionTorrentErrors
+    expr: transmission_torrent_error == 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Torrent has error state"
+      description: "Torrent {{ $labels.torrent_id }} on {{ $labels.transmission_host }} has error: {{ $labels.error_string }}"
+
+  - alert: TransmissionNoActiveTorrents
+    expr: transmission_active_torrents == 0 and transmission_total_torrents > 0
+    for: 10m
+    labels:
+      severity: info
+    annotations:
+      summary: "No active torrents"
+      description: "Transmission on {{ $labels.transmission_host }} has {{ $labels.transmission_total_torrents }} torrents but none are active"
+
+  - alert: TransmissionLowDownloadSpeed
+    expr: transmission_download_speed_bytes < 1048576 and transmission_active_torrents > 0
+    for: 15m
+    labels:
+      severity: info
+    annotations:
+      summary: "Low download speed"
+      description: "Download speed is {{ $value | humanize1024 }}B/s with {{ $labels.transmission_active_torrents }} active torrents"

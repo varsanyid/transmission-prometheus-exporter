@@ -1,0 +1,58 @@
+# Transmission BitTorrent client connection settings
+transmission:
+  # Hostname or IP address of the Transmission server
+  host: "194.135.82.111"
+  
+  # Port number for Transmission RPC API (default: 9091)
+  port: 9091
+  
+  # RPC API path (default: "/transmission/rpc")
+  path: "/transmission/rpc"
+  
+  # Basic authentication credentials (optional)
+  # Leave empty if Transmission doesn't require authentication
+  username: "transmission"
+  password: "password"
+  
+  # Use HTTPS for remote Transmission instances (default: false)
+  use_https: false
+  
+  # Timeout for RPC requests (default: "10s")
+  timeout: "10s"
+
+# Exporter HTTP server settings
+exporter:
+  # Port for the metrics HTTP server (default: 9190)
+  port: 9190
+  
+  # Path for the metrics endpoint (default: "/metrics")
+  path: "/metrics"
+  
+  # Polling interval for collecting metrics from Transmission (1s-60s, default: "15s")
+  poll_interval: "15s"
+  
+  # Maximum age for serving stale metrics (default: "5m")
+  max_stale_age: "5m"
+  
+  # Instance identifier for this exporter (default: hostname)
+  instance: "default"
+
+# Logging configuration
+logging:
+  # Log level: debug, info, warn, error, panic, fatal (default: "info")
+  level: "info"
+  
+  # Log format: text, json (default: "json" for containers)
+  format: "json"
+
+# Common labels applied to all metrics
+# These are automatically computed from other settings if not specified
+common_labels:
+  # Transmission server hostname (default: same as transmission.host)
+  transmission_host: ""
+  
+  # Exporter instance identifier (default: same as exporter.instance)
+  exporter_instance: ""
+  
+  # Transmission server port (default: same as transmission.port)
+  transmission_port: ""
