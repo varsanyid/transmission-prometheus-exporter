@@ -1,7 +1,6 @@
 # Transmission Prometheus Exporter
 [![CI/CD](https://github.com/varsanyid/transmission-prometheus-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/varsanyid/transmission-prometheus-exporter/actions/workflows/ci.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/varsanyidaniel/transmission-prometheus-exporter)](https://hub.docker.com/r/transmission-prometheus-exporter)
-[![Go Report Card](https://goreportcard.com/badge/github.com/your-org/transmission-prometheus-exporter)](https://goreportcard.com/report/github.com/your-org/transmission-prometheus-exporter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Prometheus metrics exporter for the Transmission BitTorrent client. Exposes global statistics, per-torrent metrics, and exporter health information.
