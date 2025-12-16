@@ -9,7 +9,7 @@ A Prometheus metrics exporter for the Transmission BitTorrent client. Exposes gl
 
 ```bash
 # Using Docker Compose (includes Transmission, Prometheus, Grafana)
-git clone https://github.com/your-org/transmission-prometheus-exporter
+git clone https://github.com/varsanyid/transmission-prometheus-exporter
 cd transmission-prometheus-exporter
 cp .env.example .env
 # Edit .env with your settings
@@ -32,7 +32,7 @@ docker run -d \
   transmission-prometheus-exporter:latest
 
 # Binary
-go install github.com/your-org/transmission-prometheus-exporter/cmd/transmission-exporter@latest
+go install github.com/varsanyid/transmission-prometheus-exporter/cmd/transmission-exporter@latest
 transmission-exporter
 ```
 
