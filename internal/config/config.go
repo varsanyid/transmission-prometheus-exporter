@@ -59,10 +59,8 @@ type CommonLabelsConfig struct {
 
 // Load loads configuration from file and environment variables
 func Load(configPath string) (*Config, error) {
-	// Set default values
 	setDefaults()
 	
-	// Set config file path if provided
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
 	} else {
@@ -73,15 +71,12 @@ func Load(configPath string) (*Config, error) {
 		viper.AddConfigPath("$HOME/.transmission-exporter/")
 	}
 	
-	// Enable environment variable support with automatic key mapping
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("TRANSMISSION_EXPORTER")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	
-	// Bind all environment variables for comprehensive Docker support
 	bindAllEnvironmentVariables()
 	
-	// Read configuration file (optional)
 	if err := viper.ReadInConfig(); err != nil {
 		// Config file is optional, only return error for parsing issues
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -89,7 +84,6 @@ func Load(configPath string) (*Config, error) {
 		}
 	}
 	
-	// Unmarshal into config struct
 	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
@@ -188,7 +182,6 @@ func (c *Config) postProcess() {
 func (c *Config) Validate() error {
 	var errors []string
 	
-	// Validate Transmission config
 	if c.Transmission.Host == "" {
 		errors = append(errors, "transmission.host cannot be empty")
 	}
@@ -213,7 +206,6 @@ func (c *Config) Validate() error {
 		errors = append(errors, "transmission.password must be provided when transmission.username is set")
 	}
 	
-	// Validate Exporter config
 	if c.Exporter.Port < 1 || c.Exporter.Port > 65535 {
 		errors = append(errors, fmt.Sprintf("exporter.port must be between 1 and 65535, got %d", c.Exporter.Port))
 	}
@@ -238,7 +230,6 @@ func (c *Config) Validate() error {
 		errors = append(errors, "transmission.port and exporter.port cannot be the same when transmission.host is localhost")
 	}
 	
-	// Validate Logging config
 	validLevels := map[string]bool{
 		"debug": true, "info": true, "warn": true, "error": true, "panic": true, "fatal": true,
 	}
@@ -253,7 +244,6 @@ func (c *Config) Validate() error {
 		errors = append(errors, fmt.Sprintf("logging.format must be one of [text, json], got %s", c.Logging.Format))
 	}
 	
-	// Validate Common Labels
 	if c.CommonLabels.TransmissionHost == "" {
 		errors = append(errors, "common_labels.transmission_host cannot be empty")
 	}

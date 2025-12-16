@@ -29,19 +29,6 @@ transmission-daemon --foreground --no-auth
 go test -tags=integration -v ./internal/rpc
 ```
 
-## Project Structure
-
-```
-cmd/transmission-exporter/    # Main application
-internal/
-├── cache/                    # Metric caching
-├── config/                   # Configuration
-├── metrics/                  # Prometheus metrics
-├── poller/                   # Background polling
-├── rpc/                      # Transmission RPC client
-└── server/                   # HTTP server
-```
-
 ## Architecture
 
 The exporter uses a polling architecture:

@@ -26,8 +26,8 @@ type Server struct {
 
 // Config holds the server configuration
 type Config struct {
-	Port         int           // HTTP server port (Requirements 7.3)
-	Path         string        // Metrics endpoint path (Requirements 7.3)
+	Port         int           // HTTP server port
+	Path         string        // Metrics endpoint path
 	ReadTimeout  time.Duration // HTTP read timeout for graceful shutdown
 	WriteTimeout time.Duration // HTTP write timeout for graceful shutdown
 	IdleTimeout  time.Duration // HTTP idle timeout for graceful shutdown

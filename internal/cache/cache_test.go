@@ -351,8 +351,6 @@ func TestTorrentCleanup(t *testing.T) {
 	}
 }
 
-// **Feature: transmission-prometheus-exporter, Property 12: Stale metric serving**
-// **Validates: Requirements 6.2**
 func TestProperty_StaleMetricServing(t *testing.T) {
 	property := prop.ForAll(func(
 		initialStats *rpc.SessionStats,

@@ -8,13 +8,11 @@ import (
 )
 
 func TestConfigDefaults(t *testing.T) {
-	// Test loading config with defaults when no config file exists
 	config, err := Load("")
 	if err != nil {
 		t.Fatalf("Expected no error loading default config, got: %v", err)
 	}
 	
-	// Verify default values
 	if config.Transmission.Host != "localhost" {
 		t.Errorf("Expected default host 'localhost', got: %s", config.Transmission.Host)
 	}
@@ -31,7 +29,6 @@ func TestConfigDefaults(t *testing.T) {
 		t.Errorf("Expected default poll interval 15s, got: %v", config.Exporter.PollInterval)
 	}
 	
-	// Verify common labels are computed correctly
 	if config.CommonLabels.TransmissionHost != "localhost" {
 		t.Errorf("Expected common label transmission_host 'localhost', got: %s", config.CommonLabels.TransmissionHost)
 	}
@@ -40,7 +37,6 @@ func TestConfigDefaults(t *testing.T) {
 		t.Errorf("Expected common label transmission_port '9091', got: %s", config.CommonLabels.TransmissionPort)
 	}
 	
-	// Verify helper methods
 	expectedURL := "http://localhost:9091/transmission/rpc"
 	if config.GetTransmissionURL() != expectedURL {
 		t.Errorf("Expected URL %s, got: %s", expectedURL, config.GetTransmissionURL())
@@ -327,7 +323,6 @@ func TestEnvironmentVariables(t *testing.T) {
 		t.Errorf("Expected log format from env var 'json', got: %s", config.Logging.Format)
 	}
 	
-	// Verify common labels are computed correctly
 	if config.CommonLabels.TransmissionHost != "test-host" {
 		t.Errorf("Expected common label transmission_host 'test-host', got: %s", config.CommonLabels.TransmissionHost)
 	}
@@ -366,24 +361,20 @@ func TestConfigHelperMethods(t *testing.T) {
 		},
 	}
 	
-	// Test GetTransmissionURL with HTTPS
 	expectedURL := "https://example.com:9091/transmission/rpc"
 	if config.GetTransmissionURL() != expectedURL {
 		t.Errorf("Expected URL %s, got: %s", expectedURL, config.GetTransmissionURL())
 	}
 	
-	// Test GetExporterAddress
 	expectedAddr := ":9190"
 	if config.GetExporterAddress() != expectedAddr {
 		t.Errorf("Expected address %s, got: %s", expectedAddr, config.GetExporterAddress())
 	}
 	
-	// Test HasBasicAuth
 	if !config.HasBasicAuth() {
 		t.Error("Expected basic auth to be enabled")
 	}
 	
-	// Test without basic auth
 	config.Transmission.Username = ""
 	config.Transmission.Password = ""
 	if config.HasBasicAuth() {
@@ -392,7 +383,6 @@ func TestConfigHelperMethods(t *testing.T) {
 }
 
 func TestCommonLabelsCustomization(t *testing.T) {
-	// Set custom common labels via environment variables
 	os.Setenv("TRANSMISSION_EXPORTER_COMMON_LABELS_TRANSMISSION_HOST", "custom-host")
 	os.Setenv("TRANSMISSION_EXPORTER_COMMON_LABELS_EXPORTER_INSTANCE", "custom-instance")
 	os.Setenv("TRANSMISSION_EXPORTER_COMMON_LABELS_TRANSMISSION_PORT", "custom-port")
@@ -408,7 +398,6 @@ func TestCommonLabelsCustomization(t *testing.T) {
 		t.Fatalf("Expected no error loading config, got: %v", err)
 	}
 	
-	// Verify custom common labels override computed values
 	if config.CommonLabels.TransmissionHost != "custom-host" {
 		t.Errorf("Expected custom transmission_host 'custom-host', got: %s", config.CommonLabels.TransmissionHost)
 	}

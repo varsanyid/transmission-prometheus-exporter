@@ -15,7 +15,6 @@ import (
 	"transmission-prometheus-exporter/internal/rpc"
 )
 
-// PrometheusMetrics represents the formatted metrics ready for Prometheus exposition
 type PrometheusMetrics struct {
 	Content   []byte
 	Timestamp time.Time
@@ -92,7 +91,6 @@ func (c *MetricCache) UpdateMetrics(stats *rpc.SessionStats, torrents []*rpc.Tor
 		"has_config":       config != nil,
 	}).Debug("Starting cache update with new metrics")
 	
-	// Update Prometheus metrics using the metric updater
 	if stats != nil {
 		downloadSpeed, uploadSpeed, activeTorrents, pausedTorrents, totalTorrents, cumulativeDownloaded, cumulativeUploaded := stats.ToPrometheusFloat64()
 		c.metricUpdater.UpdateGlobalMetrics(downloadSpeed, uploadSpeed, activeTorrents, pausedTorrents, totalTorrents)
@@ -273,10 +271,8 @@ func (c *MetricCache) RecordScrapeError(errorType string) {
 
 // updateOperationalMetrics updates operational metrics like memory usage and cache size
 func (c *MetricCache) updateOperationalMetrics(content []byte) {
-	// Update cache size metric
 	c.metricUpdater.UpdateCacheSize(float64(len(content)))
 	
-	// Update memory usage metrics
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	

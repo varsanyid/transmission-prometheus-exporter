@@ -10,17 +10,6 @@ import (
 	"time"
 )
 
-// Integration tests for real Transmission server communication
-// Run with: go test -tags=integration ./internal/rpc
-//
-// Environment variables for configuration:
-// TRANSMISSION_HOST - Transmission server host (default: localhost)
-// TRANSMISSION_PORT - Transmission server port (default: 9091)
-// TRANSMISSION_PATH - RPC path (default: /transmission/rpc)
-// TRANSMISSION_USERNAME - Username for authentication (optional)
-// TRANSMISSION_PASSWORD - Password for authentication (optional)
-// TRANSMISSION_USE_HTTPS - Use HTTPS (default: false)
-
 func getTestConfig() (host string, port int, path string, useHTTPS bool, username, password string) {
 	host = getEnvOrDefault("TRANSMISSION_HOST", "localhost")
 	portStr := getEnvOrDefault("TRANSMISSION_PORT", "9091")

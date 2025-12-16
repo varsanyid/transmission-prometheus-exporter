@@ -15,7 +15,7 @@ import (
 )
 
 func TestCommonLabels(t *testing.T) {
-	// Test that all metrics include consistent common labels (Requirements 8.1, 8.2, 8.3, 8.4, 8.5)
+	// Test that all metrics include consistent common labels
 	t.Run("CommonLabelConsistency", func(t *testing.T) {
 		host := "test-transmission"
 		instance := "test-exporter-instance"
@@ -239,8 +239,6 @@ func TestMetricHelp(t *testing.T) {
 	}
 }
 
-// **Feature: transmission-prometheus-exporter, Property 2: Complete metric exposure**
-// **Validates: Requirements 1.2, 1.3, 2.4, 1.5**
 func TestProperty_CompleteMetricExposure(t *testing.T) {
 	property := prop.ForAll(func(
 		downloadSpeed, uploadSpeed float64,
@@ -300,7 +298,6 @@ func TestProperty_CompleteMetricExposure(t *testing.T) {
 		
 		prometheusOutput := buf.String()
 		
-		// Define all required metric names from requirements
 		requiredGlobalMetrics := []string{
 			"transmission_download_speed_bytes",      // Requirement 1.2
 			"transmission_upload_speed_bytes",       // Requirement 1.2
@@ -353,8 +350,6 @@ func TestProperty_CompleteMetricExposure(t *testing.T) {
 			}
 		}
 		
-		// Verify Prometheus text format compliance (Requirements 1.5)
-		// Check for basic format elements
 		if !strings.Contains(prometheusOutput, "# HELP") {
 			t.Logf("Prometheus output missing HELP comments")
 			return false
